@@ -18,6 +18,8 @@
 			if ($requiredCacheParameters !== null) {
 				$this->requiredCacheParameters = json_decode($requiredCacheParameters);
 				$this->requiredCacheParametersWereLoadedFromCache = true;
+				// Check if all requiredparameters are already filled
+				$this->getFromCacheIfAllRequiredParametersAreFilled();
 			}
 		}
 
@@ -45,7 +47,7 @@
 			// Cache requiredCacheParameters
 			$this->cacheAPI->set("tiko_requiredCacheParameters_" . $this->URL, json_encode($this->requiredCacheParameters));
 			// Cache item
-			$this->cacheAPI->set("tiko_filledCacheParameters_" . $this->cacheStringForURL, $item);
+			$this->cacheAPI->set("tiko_filledCacheParameters_" . $this->URL . "_" . $this->cacheStringForURL, $item);
 		}
 
 		public function removeCacheForURL($url=null) {
@@ -76,25 +78,11 @@
 				return false;
 			}
 			// Lookup in cache and return if it is found
-			$cachedItem = $this->cacheAPI->get("tiko_filledCacheParameters_" . $this->cacheStringForURL);
+			$cachedItem = $this->cacheAPI->get("tiko_filledCacheParameters_" . $this->URL . "_" . $this->cacheStringForURL);
 			if ($cachedItem !== null) {
 				$this->cacheAPI->resolve($cachedItem);
 			}
 		}
-	}
-
-	interface TikoCacheAPI {
-
-		public function getUrl();
-
-		public function get($key);
-
-		public function set($key, $value);
-
-		public function resolve($item);
-
-		public function remove($key);
-
 	}
 
 ?>

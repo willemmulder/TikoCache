@@ -1,18 +1,25 @@
 <?php
 
 	include("tikoCacheController.php");
+	include("tikoCacheAPI.php");
 
 	class cacheAPI implements TikoCacheAPI {
 
 		private $item = null;
 		private $cache;
+		private $url;
 
 		public function __construct($cache) {
 			$this->cache = $cache;
+			$this->url = $_SERVER["SCRIPT_URI"];
 		}
 
 		public function getUrl() {
-			return $_SERVER["SCRIPT_URI"];
+			return $this->url;
+		}
+
+		public function setUrl($url) {
+			$this->url = $url;
 		}
 
 		public function get($key) {
@@ -100,6 +107,60 @@
 		}
 	}
 	test_clearCache($cache);
+
+	// =======
+
+	// Second row of tests, when there are no caching parameters (and we only have the URL)
+	function test_firstSimpleRun($cache) {
+		$cacheAPI = new cacheAPI($cache);
+		$tiko = new tikoCacheController($cacheAPI);
+		// There are no required parameters
+		// There are no parameter values
+		// Set cache
+		$result = $tiko->cache("<html><body>This is the text we want to be cached!</body></html>");
+		if ($result === false) {
+			fail("CACHING FAILED");
+		} else {
+			done("CACHING WORKED");
+		}
+	}
+	test_firstSimpleRun($cache);
+
+	function test_secondSimpleRun($cache) {
+		$cacheAPI = new cacheAPI($cache);
+		$tiko = new tikoCacheController($cacheAPI);
+		// It should fetch requiredCacheParameters from cache
+		// There are no required parameters to be filled, so the item should now be retrieved by cache. Let's check
+		$result = $cacheAPI->getItem();
+		if ($result !== "<html><body>This is the text we want to be cached!</body></html>") {
+			fail("RETRIEVING FROM CACHE FAILED. RESULT WAS " . $result);
+		} else {
+			done("RETRIEVING FROM CACHE WORKED");
+		}
+	}
+	test_secondSimpleRun($cache);
+
+	function test_clearSimpleCache($cache) {
+		$cacheAPI = new cacheAPI($cache);
+		$tiko = new tikoCacheController($cacheAPI);
+		// It should fetch requiredCacheParameters from cache
+		// Since there are no required parameters, the item should now also be retrieved by cache. 
+		$tiko->removeCacheForURL();
+		// Now, we load a new tiko instance
+		$cacheAPI = new cacheAPI($cache);
+		$tiko = new tikoCacheController($cacheAPI);
+		// It should fetch requiredCacheParameters from cache
+		// Since there are no required parameters, the item should now also be retrieved by cache. 
+		// But, *since it is removed*, it should not be found. Let's check
+		$result = $cacheAPI->getItem();
+		if ($result !== null) {
+			fail("CLEARING OF CACHE FOR URL FAILED. CACHE IS ");
+			var_dump($cache);
+		} else {
+			done("CLEARING OF CACHE FOR URL WORKED");
+		}
+	}
+	test_clearSimpleCache($cache);
 
 	// =======
 
