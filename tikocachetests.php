@@ -162,6 +162,50 @@
 	}
 	test_clearSimpleCache($cache);
 
+	function test_removeCacheWhenAllRequiredCacheParametersAreFilled($cache) {
+		$cacheAPI = new cacheAPI($cache);
+		$tiko = new tikoCacheController($cacheAPI);
+		// Set cache
+		$result = $tiko->cache("<html><body>This is the text we want to be cached!</body></html>");
+		
+		$cacheAPI = new cacheAPI($cache);
+		$doRemoveCacheWhenAllRequiredCacheParametersAreFilled = true;
+		$tiko = new tikoCacheController($cacheAPI, $doRemoveCacheWhenAllRequiredCacheParametersAreFilled);
+		// It should fetch requiredCacheParameters from cache
+		// Since there are no required parameters, the item should now also be retrieved by cache. 
+		// But *because doRemoveCacheWhenAllRequiredCacheParametersAreFilled is true*, the cached item should be deleted!
+		$result = $cacheAPI->getItem();
+		if ($result !== null) {
+			fail("CLEARING OF CACHE WHEN PARAMETERS ARE FILLED, FAILED. CACHE IS ");
+			var_dump($cache);
+		} else {
+			done("CLEARING OF CACHE WHEN PARAMETERS ARE FILLED, WORKED");
+		}
+	}
+	test_removeCacheWhenAllRequiredCacheParametersAreFilled($cache);
+
+	function test_doNotRemoveCacheWhenAllRequiredCacheParametersAreFilled($cache) {
+		$cacheAPI = new cacheAPI($cache);
+		$tiko = new tikoCacheController($cacheAPI);
+		// Set cache
+		$result = $tiko->cache("<html><body>This is the text we want to be cached!</body></html>");
+		
+		// Now, we load a new tiko instance
+		$cacheAPI = new cacheAPI($cache);
+		$tiko = new tikoCacheController($cacheAPI);
+		// It should fetch requiredCacheParameters from cache
+		// Since there are no required parameters, the item should now also be retrieved by cache. 
+		// *Since it is not removed*, it should be found. Let's check
+		$result = $cacheAPI->getItem();
+		if ($result === null) {
+			fail("NOT CLEARING OF CACHE WHEN PARAMETERS ARE FILLED, FAILED. CACHE IS ");
+			var_dump($cache);
+		} else {
+			done("NOT CLEARING OF CACHE WHEN PARAMETERS ARE FILLED, WORKED");
+		}
+	}
+	test_doNotRemoveCacheWhenAllRequiredCacheParametersAreFilled($cache);
+
 	// =======
 
 	function done($msg) {
