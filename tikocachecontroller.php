@@ -10,10 +10,11 @@
 		private $cacheStringForURL;
 		private $removeCacheWhenAllRequiredCacheParametersAreFilled = false;
 
-		public function __construct($cacheAPI) {
+		public function __construct($cacheAPI, $removeCacheWhenAllRequiredCacheParametersAreFilled = false) {
 			$this->cacheAPI = $cacheAPI;
 			// Get URL
 			$this->URL = $this->cacheAPI->getURL();
+			$this->removeCacheWhenAllRequiredCacheParametersAreFilled = $removeCacheWhenAllRequiredCacheParametersAreFilled;
 			// Try to load the requiredCacheParameters for this URL
 			$requiredCacheParameters = $this->cacheAPI->get("tiko_requiredCacheParameters_" . $this->URL);
 			if ($requiredCacheParameters !== null) {
